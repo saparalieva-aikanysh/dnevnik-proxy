@@ -1,0 +1,6 @@
+{
+  "name": "dnevnik-proxy",
+  "version": "1.0.0",
+  "description": "Proxy for Anthropic API to enable food analysis in Dnevnik app",
+  "private": true
+}
