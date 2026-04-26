@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Дневник" />
+<meta name="theme-color" content="#F5EFE6" />
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjQzg1NTNEIi8+PHRleHQgeD0iOTAiIHk9IjEyMCIgZm9udC1mYW1pbHk9InNlcmlmIiBmb250LXNpemU9IjEwMCIgZm9udC1zdHlsZT0iaXRhbGljIiBmaWxsPSIjRjVFRkU2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7QlDwvdGV4dD48L3N2Zz4=" />
+<title>Дневник</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: 'Manrope', sans-serif;
+  background: #F5EFE6;
+  background-image: radial-gradient(circle at 20% 10%, rgba(201, 95, 63, 0.04) 0%, transparent 50%), radial-gradient(circle at 80% 60%, rgba(122, 143, 110, 0.04) 0%, transparent 50%);
+  color: #2D2419;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-top: env(safe-area-inset-top);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.serif { font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, textarea { font: inherit; color: inherit; }
+input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+
+.container { max-width: 480px; margin: 0 auto; padding: 40px 20px 120px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: fadeUp 0.4s ease-out forwards; }
+@keyframes shimmer { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+.shimmer { animation: shimmer 2s ease-in-out infinite; }
+@keyframes pop { 0% { transform: scale(0.9); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+.pop { animation: pop 0.4s ease-out; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #A89684; }
+.h1 { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 300; line-height: 1.2; }
+
+.card { background: #FFFFFF; border: 1px solid #F0EBE0; border-radius: 16px; padding: 16px; }
+.card-soft { background: linear-gradient(135deg, #FFFFFF 0%, #FAF6EE 100%); border-radius: 16px; padding: 20px; box-shadow: 0 1px 3px rgba(45, 36, 25, 0.04), 0 8px 24px rgba(45, 36, 25, 0.04); }
+
+.row { display: flex; align-items: center; gap: 16px; }
+.spacer { flex: 1; }
+
+.task { width: 100%; text-align: left; padding: 16px; border-radius: 16px; background: #FFFFFF; border: 1px solid #F0EBE0; transition: all 0.2s; display: flex; align-items: center; gap: 16px; margin-bottom: 10px; }
+.task:active { transform: scale(0.98); }
+.task.done { background: #F0EBE0; border-color: #E0D5C0; }
+.task-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #FAF6EE; color: #8A7E6F; transition: all 0.2s; }
+.task.done .task-icon { background: #7A8F6E; color: #FFFFFF; }
+.task-title { font-size: 15px; font-weight: 500; }
+.task.done .task-title { text-decoration: line-through; opacity: 0.6; }
+.task-detail { font-size: 13px; color: #8A7E6F; margin-top: 2px; }
+.task.done .task-detail { opacity: 0.5; }
+.check { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid #D4C7B3; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.task.done .check { background: #7A8F6E; border-color: #7A8F6E; }
+.check svg { display: none; }
+.task.done .check svg { display: block; }
+
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(245, 239, 230, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(45, 36, 25, 0.06); z-index: 30; padding-bottom: env(safe-area-inset-bottom); }
+.bottom-nav-inner { max-width: 480px; margin: 0 auto; display: flex; }
+.nav-btn { flex: 1; padding: 16px 0; text-align: center; position: relative; font-size: 13px; color: #8A7E6F; font-family: 'Manrope', sans-serif; }
+.nav-btn.active { color: #C8553D; font-family: 'Fraunces', serif; font-style: italic; font-weight: 500; }
+.nav-btn.active::after { content: ''; position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: #C8553D; }
+
+.modal-bg { position: fixed; inset: 0; z-index: 40; background: rgba(45, 36, 25, 0.4); backdrop-filter: blur(8px); display: flex; align-items: flex-end; justify-content: center; padding: 0; }
+.modal { width: 100%; max-width: 480px; background: #F5EFE6; border-radius: 24px 24px 0 0; max-height: 92vh; overflow-y: auto; padding: 24px; padding-bottom: calc(24px + env(safe-area-inset-bottom)); animation: slideUp 0.3s ease-out; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.input-card { background: #FFFFFF; border-radius: 16px; padding: 16px; }
+.input-card label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #A89684; display: block; }
+.input-card input[type="text"], .input-card textarea { width: 100%; margin-top: 8px; font-family: 'Fraunces', serif; font-size: 20px; font-weight: 300; background: transparent; border: none; outline: none; color: #2D2419; }
+.input-card textarea { font-family: 'Manrope', sans-serif; font-size: 15px; resize: none; line-height: 1.5; }
+
+.num-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.num-btn { width: 36px; height: 36px; border-radius: 50%; background: #FAF6EE; color: #2D2419; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.num-input-wrap { flex: 1; text-align: center; }
+.num-input-wrap input { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 300; width: 100%; text-align: center; background: transparent; border: none; outline: none; color: #2D2419; }
+.num-input-wrap .unit { font-size: 12px; color: #8A7E6F; }
+
+.scale-grid { display: flex; gap: 4px; margin-top: 12px; }
+.scale-btn { flex: 1; height: 36px; border-radius: 8px; background: #FAF6EE; color: #A89684; font-size: 12px; font-weight: 500; }
+.scale-btn.active { background: #C8553D; color: #FFFFFF; }
+
+.btn-primary { width: 100%; padding: 16px; border-radius: 16px; background: #C8553D; color: #FFFFFF; font-weight: 500; font-size: 16px; transition: transform 0.15s; }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { background: #D4C7B3; }
+
+.btn-green { width: 100%; padding: 16px; border-radius: 16px; background: #7A8F6E; color: #FFFFFF; font-weight: 500; font-size: 16px; transition: transform 0.15s; }
+.btn-green:active { transform: scale(0.98); }
+
+.btn-secondary { width: 100%; padding: 16px; border-radius: 16px; background: #FFFFFF; color: #8A7E6F; font-weight: 500; font-size: 16px; border: 1px solid #F0EBE0; transition: transform 0.15s; }
+
+.close-btn { width: 36px; height: 36px; border-radius: 50%; background: #FFFFFF; color: #8A7E6F; display: flex; align-items: center; justify-content: center; }
+
+.food-search { background: #FFFFFF; border: 1px solid #F0EBE0; border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.food-search input { flex: 1; border: none; outline: none; background: transparent; font-size: 15px; }
+
+.food-item { background: #FFFFFF; border: 1px solid #F0EBE0; border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; transition: all 0.15s; }
+.food-item:active { transform: scale(0.98); background: #FAF6EE; }
+.food-item-name { font-size: 14px; font-weight: 500; }
+.food-item-meta { font-size: 12px; color: #8A7E6F; margin-top: 2px; }
+.food-item-cal { font-family: 'Fraunces', serif; font-size: 16px; color: #C8553D; flex-shrink: 0; }
+
+.qty-controls { display: flex; align-items: center; gap: 8px; background: #FAF6EE; border-radius: 24px; padding: 4px; }
+.qty-btn { width: 32px; height: 32px; border-radius: 50%; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #2D2419; }
+.qty-val { min-width: 32px; text-align: center; font-weight: 500; font-size: 14px; }
+
+.tab-pill { padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; background: #FFFFFF; color: #8A7E6F; border: 1px solid #F0EBE0; }
+.tab-pill.active { background: #2D2419; color: #F5EFE6; border-color: #2D2419; }
+
+.icon-btn { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+
+.empty-card { padding: 32px 24px; text-align: center; background: #FFFFFF; border: 1px dashed #D4C7B3; border-radius: 16px; }
+.empty-card svg { color: #C8B8A0; margin: 0 auto 12px; }
+.empty-card p { font-family: 'Fraunces', serif; font-style: italic; font-size: 14px; color: #8A7E6F; }
+
+.divider { border-top: 1px solid #F0EBE0; }
+
+.celebrate-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 50; display: flex; align-items: center; justify-content: center; }
+.celebrate-emoji { font-size: 72px; }
+
+.toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #2D2419; color: #F5EFE6; padding: 12px 20px; border-radius: 24px; font-size: 14px; font-weight: 500; z-index: 60; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- ========== TODAY ========== -->
+  <div id="tab-today" class="tab-content active fade-up">
+    <p class="eyebrow" id="today-date" style="margin-bottom: 4px;"></p>
+    <h1 class="h1" style="margin-bottom: 16px;">Привет, <span style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 44px; color: #C8553D;">Айканыш</span></h1>
+
+    <div class="date-nav" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 24px; padding: 6px; background: #FFFFFF; border: 1px solid #F0EBE0; border-radius: 14px;">
+      <button class="date-nav-arrow" id="today-date-prev" style="width: 36px; height: 36px; border-radius: 10px; background: #FAF6EE; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2D2419" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button id="today-date-label" style="flex: 1; text-align: center; font-family: 'Fraunces', serif; font-style: italic; font-size: 16px; color: #2D2419;">Сегодня</button>
+      <button class="date-nav-arrow" id="today-date-next" style="width: 36px; height: 36px; border-radius: 10px; background: #FAF6EE; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2D2419" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+
+    <div class="card-soft" style="margin-bottom: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+        <span class="eyebrow">Программа</span>
+        <span class="serif" style="font-style: italic; font-size: 14px; color: #8A7E6F;" id="week-label"></span>
+      </div>
+      <div id="week-bars" style="display: flex; gap: 4px;"></div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 8px; margin-bottom: 24px;">
+      <div>
+        <div class="serif" style="font-size: 44px; font-weight: 300;">
+          <span id="completed-count">0</span><span style="color: #C8B8A0;">/5</span>
+        </div>
+        <p style="font-size: 14px; color: #8A7E6F; margin-top: 4px;" id="completed-label">Старт</p>
+      </div>
+      <div id="streak-badge" style="display: none; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 24px; background: #FFF4ED;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8553D" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+        <span style="font-size: 14px; font-weight: 500; color: #C8553D;" id="streak-count"></span>
+      </div>
+    </div>
+
+    <button class="card" id="journal-summary-card" style="width: 100%; text-align: left; padding: 20px; margin-bottom: 24px; cursor: pointer;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px;">
+        <span class="eyebrow">Дневник</span>
+        <span style="color: #A89684;">›</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+        <div>
+          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #A89684; margin-bottom: 4px;">Съедено</div>
+          <div class="serif" style="font-size: 24px; font-weight: 300;" id="summary-cal">0</div>
+          <div style="font-size: 11px; color: #8A7E6F;">из 1700</div>
+        </div>
+        <div>
+          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #A89684; margin-bottom: 4px;">Белок</div>
+          <div class="serif" style="font-size: 24px; font-weight: 300;"><span id="summary-pro">0</span><span style="font-size: 14px; color: #8A7E6F;">г</span></div>
+          <div style="font-size: 11px; color: #8A7E6F;">из 120</div>
+        </div>
+        <div>
+          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #A89684; margin-bottom: 4px;">Сожжено</div>
+          <div class="serif" style="font-size: 24px; font-weight: 300; color: #7A8F6E;" id="summary-burned">0</div>
+          <div style="font-size: 11px; color: #8A7E6F;">тренировки</div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="height: 6px; border-radius: 3px; overflow: hidden; background: #F0EBE0;">
+          <div id="cal-bar" style="height: 100%; border-radius: 3px; width: 0%; background: linear-gradient(90deg, #E89A7C, #C8553D); transition: width 0.5s;"></div>
+        </div>
+        <div style="height: 6px; border-radius: 3px; overflow: hidden; background: #F0EBE0;">
+          <div id="pro-bar" style="height: 100%; border-radius: 3px; width: 0%; background: #7A8F6E; transition: width 0.5s;"></div>
+        </div>
+      </div>
+    </button>
+
+    <div id="tasks-list"></div>
+
+    <button id="sunday-checkin" class="shimmer" style="display:none; width: 100%; padding: 20px; border-radius: 16px; text-align: left; background: linear-gradient(135deg, #FFF4ED 0%, #FFEEDD 100%); border: 1px solid #F0D9C4; margin-top: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 22px;">✨</span>
+        <div style="flex: 1;">
+          <div class="serif" style="font-style: italic; font-size: 18px;">Воскресенье — день замеров</div>
+          <div style="font-size: 13px; color: #8A7E6F;">5 цифр: вес, талия, бёдра, энергия, сон</div>
+        </div>
+        <span style="color: #C8553D;">›</span>
+      </div>
+    </button>
+
+    <div style="text-align: center; padding: 16px 12px;">
+      <p class="serif" style="font-style: italic; font-size: 15px; color: #8A7E6F;" id="motivation-text"></p>
+    </div>
+  </div>
+
+  <!-- ========== JOURNAL ========== -->
+  <div id="tab-journal" class="tab-content fade-up">
+    <p class="eyebrow" id="journal-eyebrow">Сегодня</p>
+    <h1 class="h1" style="margin-bottom: 16px;">Дневник</h1>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 24px; padding: 6px; background: #FFFFFF; border: 1px solid #F0EBE0; border-radius: 14px;">
+      <button id="journal-date-prev" style="width: 36px; height: 36px; border-radius: 10px; background: #FAF6EE; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2D2419" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button id="journal-date-label" style="flex: 1; text-align: center; font-family: 'Fraunces', serif; font-style: italic; font-size: 16px; color: #2D2419;">Сегодня</button>
+      <button id="journal-date-next" style="width: 36px; height: 36px; border-radius: 10px; background: #FAF6EE; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2D2419" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+
+    <div style="background: linear-gradient(140deg, #2D2419 0%, #3F3328 100%); color: #F5EFE6; border-radius: 24px; padding: 28px; margin-bottom: 24px;">
+      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; opacity: 0.6; margin-bottom: 8px;" id="journal-status">Осталось съесть</div>
+      <div style="display: flex; align-items: baseline; gap: 8px;">
+        <span class="serif" style="font-size: 56px; font-weight: 300;" id="journal-big-num">1700</span>
+        <span class="serif" style="font-style: italic; font-size: 20px; opacity: 0.7;">ккал</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div>
+          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.5; margin-bottom: 4px;">Съедено</div>
+          <div class="serif" style="font-size: 20px;" id="j-eaten">0</div>
+        </div>
+        <div>
+          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.5; margin-bottom: 4px;">Белок</div>
+          <div class="serif" style="font-size: 20px;"><span id="j-pro">0</span><span style="font-size: 12px; opacity: 0.6;">г</span></div>
+        </div>
+        <div>
+          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.5; margin-bottom: 4px;">Сожжено</div>
+          <div class="serif" style="font-size: 20px; color: #A8C291;" id="j-burned">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+      <button class="btn-primary" id="add-food-btn" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+        <span style="font-size: 14px;">Добавить еду</span>
+      </button>
+      <button class="btn-green" id="add-training-btn" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.4 14.4 9.6 9.6"/><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"/></svg>
+        <span style="font-size: 14px;">Тренировка</span>
+      </button>
+    </div>
+
+    <div style="margin-bottom: 24px;">
+      <div style="display: flex; justify-content: space-between; padding: 0 8px; margin-bottom: 12px;">
+        <span class="eyebrow">Еда</span>
+        <span class="eyebrow" id="food-count"></span>
+      </div>
+      <div id="food-list"></div>
+    </div>
+
+    <div style="margin-bottom: 24px;">
+      <div style="display: flex; justify-content: space-between; padding: 0 8px; margin-bottom: 12px;">
+        <span class="eyebrow">Тренировки</span>
+        <span class="eyebrow" id="training-count"></span>
+      </div>
+      <div id="training-list"></div>
+    </div>
+
+    <div class="card" style="background: #FAF6EE; display: flex; gap: 12px; align-items: flex-start;">
+      <span style="color: #A89684; font-size: 16px; flex-shrink: 0;">ⓘ</span>
+      <p style="font-size: 12px; line-height: 1.6; color: #8A7E6F;">Цель — увидеть паттерны, не идеальная точность. Если что-то ела, но не записала — это ок. Главное общая картина дня.</p>
+    </div>
+  </div>
+
+  <!-- ========== PROGRESS ========== -->
+  <div id="tab-progress" class="tab-content fade-up">
+    <p class="eyebrow">Путь</p>
+    <h1 class="h1" style="margin-bottom: 24px;">Прогресс</h1>
+
+    <div style="background: linear-gradient(140deg, #2D2419 0%, #3F3328 100%); color: #F5EFE6; border-radius: 24px; padding: 28px; margin-bottom: 24px;">
+      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; opacity: 0.6; margin-bottom: 8px;">Сейчас</div>
+      <div style="display: flex; align-items: baseline; gap: 8px;">
+        <span class="serif" style="font-size: 56px; font-weight: 300;" id="current-weight">81.5</span>
+        <span class="serif" style="font-style: italic; font-size: 20px; opacity: 0.7;">кг</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px; margin-top: 20px;">
+        <div>
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; opacity: 0.5; margin-bottom: 4px;">Прошла</div>
+          <div class="serif" style="font-size: 22px;">−<span id="lost-kg">0.0</span><span style="font-size: 13px; opacity: 0.6;"> кг</span></div>
+        </div>
+        <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.2);"></div>
+        <div>
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; opacity: 0.5; margin-bottom: 4px;">До цели</div>
+          <div class="serif" style="font-size: 22px;"><span id="togo-kg">18.5</span><span style="font-size: 13px; opacity: 0.6;"> кг</span></div>
+        </div>
+      </div>
+      <div style="margin-top: 24px;">
+        <div style="display: flex; justify-content: space-between; font-size: 11px; opacity: 0.6; margin-bottom: 6px;"><span>81.5 кг</span><span>63 кг</span></div>
+        <div style="height: 6px; border-radius: 3px; overflow: hidden; background: rgba(255,255,255,0.1);">
+          <div id="progress-bar" style="height: 100%; border-radius: 3px; width: 2%; background: linear-gradient(90deg, #E89A7C, #C8553D); transition: width 1s;"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-secondary" id="add-checkin-btn" style="border: 1px dashed #C8553D; color: #C8553D; background: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 24px;">
+      <span style="font-size: 18px;">+</span>
+      <span>Новый замер</span>
+    </button>
+
+    <div id="checkin-list"></div>
+
+    <div class="card" style="background: #FAF6EE; display: flex; gap: 12px; align-items: flex-start; margin-top: 24px;">
+      <span style="color: #8A7E6F; font-size: 18px; flex-shrink: 0;">📷</span>
+      <div>
+        <div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">Фото раз в месяц</div>
+        <div style="font-size: 13px; line-height: 1.5; color: #8A7E6F;">Та же одежда, тот же свет, 4 ракурса. Профиль покажет правду первым.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PLAN ========== -->
+  <div id="tab-plan" class="tab-content fade-up">
+    <p class="eyebrow">Карта</p>
+    <h1 class="h1" style="margin-bottom: 24px;">План</h1>
+
+    <div style="margin-bottom: 24px;">
+      <p class="eyebrow" style="margin-bottom: 12px; padding: 0 8px;">Каждый день</p>
+      <div id="plan-tasks"></div>
+    </div>
+
+    <div style="margin-bottom: 24px;">
+      <p class="eyebrow" style="margin-bottom: 12px; padding: 0 8px;">Неделя по дням</p>
+      <div class="card" style="padding: 0;" id="plan-week"></div>
+    </div>
+
+    <div style="background: linear-gradient(140deg, #FFF4ED 0%, #FAEEDB 100%); border-radius: 16px; padding: 24px;">
+      <h3 class="serif" style="font-style: italic; font-size: 22px; margin-bottom: 16px;">Три принципа</h3>
+      <div style="display: flex; flex-direction: column; gap: 12px; font-size: 14px; line-height: 1.6; color: #3F3328;">
+        <p><span class="serif" style="font-style: italic; color: #C8553D;">Один — </span>80% соблюдения = результат. Стремление к 100% ломает план.</p>
+        <p><span class="serif" style="font-style: italic; color: #C8553D;">Два — </span>Замеры важнее веса. Талия не обманывает. Вода и цикл обманывают весы.</p>
+        <p><span class="serif" style="font-style: italic; color: #C8553D;">Три — </span>Сравнивай только с собой неделю назад. Никогда — с чужим телом.</p>
+      </div>
+    </div>
+
+    <p class="serif" style="font-style: italic; font-size: 14px; color: #A89684; text-align: center; padding: 16px;">8 недель · до 1 июня</p>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="nav-btn active" data-tab="today">Сегодня</button>
+    <button class="nav-btn" data-tab="journal">Дневник</button>
+    <button class="nav-btn" data-tab="progress">Прогресс</button>
+    <button class="nav-btn" data-tab="plan">План</button>
+  </div>
+</nav>
+
+<div id="celebrate" style="display: none;" class="celebrate-overlay"><div class="pop celebrate-emoji">✨</div></div>
+<div id="toast" class="toast"></div>
+<div id="modal-root"></div>
+
+<script>
+// ============== SETTINGS ==============
+// Set to your Vercel deployment URL after deploy. Empty = AI features disabled.
+const PROXY_URL = ""; // e.g. "https://dnevnik-proxy.vercel.app"
+
+const SETTINGS = {
+  name: "Айканыш",
+  startWeight: 81.5,
+  goalWeight: 63,
+  startDate: "2026-04-26",
+  programWeeks: 8,
+  trainingDays: [2, 4, 6],
+  calorieTarget: 1700,
+  proteinTarget: 120,
+};
+
+const DAILY_TASKS = [
+  { id: "food", title: "Еда по плану", detail: "≤ 1700 ккал · 120 г белка", icon: "🍽" },
+  { id: "water", title: "2 литра воды", detail: "Стакан с утра, бутылка на работе", icon: "💧" },
+  { id: "coffee", title: "Кофе осознанно", detail: "Капучино только утром", icon: "☕" },
+  { id: "steps", title: "8000+ шагов", detail: "Хотя бы прогулка после обеда", icon: "👟" },
+  { id: "sleep", title: "Сон 7–8 часов", detail: "Отбой до 23:00", icon: "🌙" },
+];
+
+const WEEKLY_PLAN = [
+  { day: "ПН", label: "Старт недели", note: "Meal prep вечером" },
+  { day: "ВТ", label: "Burn II", note: "Силовая · белок после" },
+  { day: "СР", label: "Восстановление", note: "10 000 шагов" },
+  { day: "ЧТ", label: "Burn II", note: "Силовая" },
+  { day: "ПТ", label: "Социальный день", note: "Без алкоголя" },
+  { day: "СБ", label: "Burn II", note: "Утром · длинная прогулка" },
+  { day: "ВС", label: "Чек-ин", note: "Замеры · подготовка к неделе" },
+];
+
+const TRAINING_TYPES = [
+  { name: "Burn II", cal: 350 },
+  { name: "Bootcamp", cal: 400 },
+  { name: "Metcon", cal: 380 },
+  { name: "Full Body", cal: 320 },
+  { name: "Legs / Glute", cal: 300 },
+  { name: "Кардио", cal: 250 },
+  { name: "Прогулка", cal: 150 },
+  { name: "Другое", cal: 200 },
+];
+
+// ============== FOOD LIBRARY ==============
+// Per portion as described. cal/protein/carbs/fat
+const FOOD_LIBRARY = [
+  // Завтрак
+  { c: "Завтрак", n: "Яйцо варёное", p: "1 шт", cal: 70, pr: 6, ca: 0.5, fa: 5 },
+  { c: "Завтрак", n: "Яичница на масле", p: "2 яйца + 1 ч.л. масла", cal: 220, pr: 12, ca: 1, fa: 18 },
+  { c: "Завтрак", n: "Омлет с молоком", p: "2 яйца + 50 мл молока", cal: 200, pr: 14, ca: 2, fa: 14 },
+  { c: "Завтрак", n: "Овсянка на воде", p: "200 г готовой", cal: 160, pr: 5, ca: 28, fa: 3 },
+  { c: "Завтрак", n: "Овсянка на молоке", p: "200 г готовой", cal: 220, pr: 8, ca: 30, fa: 7 },
+  { c: "Завтрак", n: "Творог 5%", p: "100 г", cal: 120, pr: 17, ca: 2, fa: 5 },
+  { c: "Завтрак", n: "Творог 9%", p: "100 г", cal: 160, pr: 16, ca: 2, fa: 9 },
+  { c: "Завтрак", n: "Сырники со сметаной", p: "3 шт + сметана", cal: 350, pr: 18, ca: 28, fa: 18 },
+  { c: "Завтрак", n: "Гречка отварная", p: "150 г", cal: 165, pr: 6, ca: 30, fa: 2 },
+  { c: "Завтрак", n: "Тост с авокадо", p: "1 ломтик + ½ авокадо", cal: 250, pr: 6, ca: 22, fa: 16 },
+  { c: "Завтрак", n: "Тост с авокадо и яйцом", p: "1 ломтик + ½ авокадо + яйцо", cal: 320, pr: 12, ca: 22, fa: 21 },
+  { c: "Завтрак", n: "Йогурт греческий 2%", p: "150 г", cal: 100, pr: 14, ca: 6, fa: 3 },
+  { c: "Завтрак", n: "Гранола с йогуртом", p: "50 г + 100 г йогурта", cal: 320, pr: 10, ca: 38, fa: 14 },
+  { c: "Завтрак", n: "Блины с творогом", p: "2 шт", cal: 280, pr: 14, ca: 32, fa: 11 },
+
+  // Обед / ужин — белок
+  { c: "Белок", n: "Куриная грудка варёная", p: "150 г", cal: 165, pr: 31, ca: 0, fa: 4 },
+  { c: "Белок", n: "Куриная грудка жареная", p: "150 г + масло", cal: 240, pr: 31, ca: 0, fa: 13 },
+  { c: "Белок", n: "Куриное бедро", p: "150 г", cal: 270, pr: 26, ca: 0, fa: 18 },
+  { c: "Белок", n: "Говядина варёная", p: "150 г", cal: 380, pr: 38, ca: 0, fa: 25 },
+  { c: "Белок", n: "Свинина жареная", p: "150 г", cal: 450, pr: 30, ca: 0, fa: 35 },
+  { c: "Белок", n: "Лосось запечённый", p: "150 г", cal: 280, pr: 30, ca: 0, fa: 17 },
+  { c: "Белок", n: "Тунец консервированный в собств. соку", p: "100 г", cal: 100, pr: 24, ca: 0, fa: 1 },
+  { c: "Белок", n: "Креветки варёные", p: "150 г", cal: 130, pr: 27, ca: 1, fa: 2 },
+  { c: "Белок", n: "Котлета куриная", p: "1 шт ~100 г", cal: 200, pr: 18, ca: 8, fa: 11 },
+
+  // Углеводы
+  { c: "Углеводы", n: "Рис варёный", p: "150 г", cal: 195, pr: 4, ca: 42, fa: 1 },
+  { c: "Углеводы", n: "Макароны варёные", p: "150 г", cal: 200, pr: 7, ca: 40, fa: 1 },
+  { c: "Углеводы", n: "Картофельное пюре", p: "200 г", cal: 240, pr: 4, ca: 30, fa: 12 },
+  { c: "Углеводы", n: "Картофель запечённый", p: "200 г", cal: 180, pr: 4, ca: 38, fa: 1 },
+  { c: "Углеводы", n: "Хлеб ржаной", p: "1 ломтик", cal: 80, pr: 3, ca: 15, fa: 1 },
+  { c: "Углеводы", n: "Хлеб белый", p: "1 ломтик", cal: 90, pr: 3, ca: 17, fa: 1 },
+  { c: "Углеводы", n: "Лаваш", p: "100 г", cal: 280, pr: 9, ca: 56, fa: 1 },
+  { c: "Углеводы", n: "Плов", p: "200 г", cal: 420, pr: 14, ca: 40, fa: 22 },
+  { c: "Углеводы", n: "Манты", p: "3 шт", cal: 350, pr: 15, ca: 30, fa: 18 },
+  { c: "Углеводы", n: "Бешбармак", p: "тарелка", cal: 580, pr: 30, ca: 50, fa: 28 },
+
+  // Овощи / салаты
+  { c: "Овощи", n: "Овощной салат с маслом", p: "200 г", cal: 130, pr: 3, ca: 12, fa: 9 },
+  { c: "Овощи", n: "Греческий салат", p: "200 г", cal: 250, pr: 8, ca: 12, fa: 19 },
+  { c: "Овощи", n: "Цезарь с курицей", p: "250 г", cal: 450, pr: 28, ca: 18, fa: 30 },
+  { c: "Овощи", n: "Огурец", p: "1 шт средний", cal: 15, pr: 1, ca: 3, fa: 0 },
+  { c: "Овощи", n: "Помидор", p: "1 шт средний", cal: 22, pr: 1, ca: 5, fa: 0 },
+  { c: "Овощи", n: "Авокадо", p: "½ шт", cal: 160, pr: 2, ca: 9, fa: 15 },
+  { c: "Овощи", n: "Брокколи на пару", p: "150 г", cal: 50, pr: 4, ca: 10, fa: 1 },
+  { c: "Овощи", n: "Овощи запечённые", p: "200 г", cal: 130, pr: 4, ca: 18, fa: 5 },
+
+  // Фрукты / ягоды
+  { c: "Фрукты", n: "Яблоко", p: "1 шт", cal: 80, pr: 0, ca: 21, fa: 0 },
+  { c: "Фрукты", n: "Банан", p: "1 шт", cal: 105, pr: 1, ca: 27, fa: 0 },
+  { c: "Фрукты", n: "Апельсин", p: "1 шт", cal: 65, pr: 1, ca: 16, fa: 0 },
+  { c: "Фрукты", n: "Ягоды", p: "100 г", cal: 50, pr: 1, ca: 11, fa: 0 },
+  { c: "Фрукты", n: "Виноград", p: "100 г", cal: 70, pr: 1, ca: 18, fa: 0 },
+
+  // Кофе
+  { c: "Кофе", n: "Эспрессо", p: "30 мл", cal: 3, pr: 0, ca: 0, fa: 0 },
+  { c: "Кофе", n: "Двойной эспрессо", p: "60 мл", cal: 6, pr: 0, ca: 0, fa: 0 },
+  { c: "Кофе", n: "Американо", p: "200 мл", cal: 5, pr: 0, ca: 1, fa: 0 },
+  { c: "Кофе", n: "Американо с молоком", p: "200 мл + 30 мл молока", cal: 25, pr: 1, ca: 1, fa: 1 },
+  { c: "Кофе", n: "Капучино на обезжирке", p: "200 мл", cal: 60, pr: 6, ca: 8, fa: 0 },
+  { c: "Кофе", n: "Капучино на цельном молоке", p: "200 мл", cal: 90, pr: 5, ca: 7, fa: 5 },
+  { c: "Кофе", n: "Капучино на овсяном молоке", p: "200 мл", cal: 100, pr: 2, ca: 14, fa: 4 },
+  { c: "Кофе", n: "Капучино на миндальном", p: "200 мл", cal: 50, pr: 1, ca: 4, fa: 3 },
+  { c: "Кофе", n: "Капучино на кокосовом", p: "200 мл", cal: 70, pr: 0, ca: 4, fa: 6 },
+  { c: "Кофе", n: "Латте на обезжирке", p: "300 мл", cal: 110, pr: 11, ca: 15, fa: 0 },
+  { c: "Кофе", n: "Латте на цельном молоке", p: "300 мл", cal: 150, pr: 8, ca: 12, fa: 8 },
+  { c: "Кофе", n: "Латте на овсяном молоке", p: "300 мл", cal: 170, pr: 3, ca: 24, fa: 7 },
+  { c: "Кофе", n: "Флэт уайт", p: "200 мл", cal: 110, pr: 6, ca: 8, fa: 6 },
+  { c: "Кофе", n: "Раф классический", p: "200 мл", cal: 250, pr: 3, ca: 16, fa: 19 },
+  { c: "Кофе", n: "Раф ванильный", p: "200 мл", cal: 290, pr: 3, ca: 28, fa: 19 },
+  { c: "Кофе", n: "Раф цитрусовый", p: "200 мл", cal: 270, pr: 3, ca: 22, fa: 19 },
+  { c: "Кофе", n: "Мокко", p: "300 мл", cal: 290, pr: 9, ca: 35, fa: 13 },
+  { c: "Кофе", n: "Кофе по-турецки", p: "100 мл", cal: 5, pr: 0, ca: 1, fa: 0 },
+  { c: "Кофе", n: "Кофе с молоком и сахаром", p: "200 мл", cal: 110, pr: 4, ca: 16, fa: 4 },
+  { c: "Кофе", n: "Айс латте на молоке", p: "350 мл", cal: 160, pr: 8, ca: 14, fa: 8 },
+  { c: "Кофе", n: "Карамельный латте", p: "300 мл", cal: 280, pr: 8, ca: 38, fa: 10 },
+  { c: "Кофе", n: "Капучино + 1 ч.л. сахара", p: "200 мл", cal: 110, pr: 5, ca: 12, fa: 5 },
+
+  // Напитки
+  { c: "Напитки", n: "Сок апельсиновый", p: "200 мл", cal: 90, pr: 1, ca: 22, fa: 0 },
+  { c: "Напитки", n: "Сок яблочный", p: "200 мл", cal: 95, pr: 0, ca: 24, fa: 0 },
+  { c: "Напитки", n: "Кола", p: "330 мл", cal: 140, pr: 0, ca: 35, fa: 0 },
+  { c: "Напитки", n: "Кола Zero", p: "330 мл", cal: 1, pr: 0, ca: 0, fa: 0 },
+  { c: "Напитки", n: "Чай чёрный без сахара", p: "200 мл", cal: 2, pr: 0, ca: 0, fa: 0 },
+  { c: "Напитки", n: "Чай с молоком", p: "200 мл", cal: 50, pr: 2, ca: 5, fa: 2 },
+  { c: "Напитки", n: "Какао на молоке", p: "200 мл", cal: 180, pr: 8, ca: 22, fa: 7 },
+  { c: "Напитки", n: "Смузи фруктовый", p: "300 мл", cal: 220, pr: 3, ca: 48, fa: 2 },
+  { c: "Напитки", n: "Вино красное", p: "150 мл", cal: 125, pr: 0, ca: 4, fa: 0 },
+  { c: "Напитки", n: "Вино белое", p: "150 мл", cal: 120, pr: 0, ca: 4, fa: 0 },
+  { c: "Напитки", n: "Шампанское", p: "150 мл", cal: 130, pr: 0, ca: 4, fa: 0 },
+  { c: "Напитки", n: "Пиво светлое", p: "500 мл", cal: 220, pr: 2, ca: 18, fa: 0 },
+  { c: "Напитки", n: "Коктейль (мохито/маргарита)", p: "200 мл", cal: 220, pr: 0, ca: 25, fa: 0 },
+
+  // Сладкое
+  { c: "Сладкое", n: "Шоколад тёмный 70%", p: "30 г", cal: 170, pr: 2, ca: 15, fa: 12 },
+  { c: "Сладкое", n: "Шоколад молочный", p: "30 г", cal: 160, pr: 2, ca: 17, fa: 9 },
+  { c: "Сладкое", n: "Шоколад белый", p: "30 г", cal: 165, pr: 2, ca: 18, fa: 10 },
+  { c: "Сладкое", n: "Конфета шоколадная", p: "1 шт ~10 г", cal: 55, pr: 1, ca: 6, fa: 3 },
+  { c: "Сладкое", n: "Зефир", p: "1 шт ~30 г", cal: 95, pr: 0, ca: 23, fa: 0 },
+  { c: "Сладкое", n: "Пастила", p: "1 шт ~30 г", cal: 95, pr: 0, ca: 24, fa: 0 },
+  { c: "Сладкое", n: "Мармелад", p: "30 г", cal: 100, pr: 0, ca: 24, fa: 0 },
+  { c: "Сладкое", n: "Печенье овсяное", p: "1 шт", cal: 90, pr: 2, ca: 14, fa: 3 },
+  { c: "Сладкое", n: "Печенье шоколадное", p: "1 шт ~15 г", cal: 75, pr: 1, ca: 10, fa: 4 },
+  { c: "Сладкое", n: "Круассан", p: "1 шт ~60 г", cal: 250, pr: 5, ca: 26, fa: 14 },
+  { c: "Сладкое", n: "Круассан с шоколадом", p: "1 шт ~70 г", cal: 320, pr: 6, ca: 30, fa: 19 },
+  { c: "Сладкое", n: "Маффин", p: "1 шт ~80 г", cal: 290, pr: 4, ca: 36, fa: 14 },
+  { c: "Сладкое", n: "Чизкейк", p: "100 г", cal: 320, pr: 6, ca: 26, fa: 22 },
+  { c: "Сладкое", n: "Тирамису", p: "100 г", cal: 280, pr: 5, ca: 28, fa: 17 },
+  { c: "Сладкое", n: "Медовик", p: "100 г", cal: 380, pr: 5, ca: 45, fa: 20 },
+  { c: "Сладкое", n: "Наполеон", p: "100 г", cal: 380, pr: 5, ca: 40, fa: 23 },
+  { c: "Сладкое", n: "Эклер", p: "1 шт ~50 г", cal: 200, pr: 4, ca: 22, fa: 11 },
+  { c: "Сладкое", n: "Пончик", p: "1 шт ~70 г", cal: 290, pr: 4, ca: 35, fa: 15 },
+  { c: "Сладкое", n: "Чак-чак", p: "50 г", cal: 180, pr: 2, ca: 30, fa: 6 },
+  { c: "Сладкое", n: "Баурсаки", p: "3 шт ~50 г", cal: 200, pr: 4, ca: 26, fa: 9 },
+  { c: "Сладкое", n: "Халва", p: "30 г", cal: 155, pr: 4, ca: 13, fa: 10 },
+  { c: "Сладкое", n: "Мёд", p: "1 ч.л. (10 г)", cal: 30, pr: 0, ca: 8, fa: 0 },
+  { c: "Сладкое", n: "Сахар", p: "1 ч.л. (5 г)", cal: 20, pr: 0, ca: 5, fa: 0 },
+  { c: "Сладкое", n: "Варенье", p: "1 ст.л. (20 г)", cal: 55, pr: 0, ca: 14, fa: 0 },
+  { c: "Сладкое", n: "Мороженое сливочное", p: "100 г", cal: 220, pr: 4, ca: 24, fa: 12 },
+  { c: "Сладкое", n: "Мороженое в стаканчике", p: "1 шт ~80 г", cal: 180, pr: 3, ca: 20, fa: 10 },
+  { c: "Сладкое", n: "Эскимо", p: "1 шт ~80 г", cal: 250, pr: 3, ca: 22, fa: 17 },
+  { c: "Сладкое", n: "Сорбет фруктовый", p: "100 г", cal: 130, pr: 0, ca: 32, fa: 0 },
+  { c: "Сладкое", n: "Финики", p: "3 шт", cal: 80, pr: 1, ca: 20, fa: 0 },
+  { c: "Сладкое", n: "Курага", p: "30 г", cal: 75, pr: 1, ca: 18, fa: 0 },
+
+  // Перекусы
+  { c: "Перекус", n: "Орехи смесь", p: "30 г", cal: 180, pr: 5, ca: 6, fa: 16 },
+  { c: "Перекус", n: "Миндаль", p: "30 г", cal: 175, pr: 6, ca: 6, fa: 15 },
+  { c: "Перекус", n: "Грецкий орех", p: "30 г", cal: 195, pr: 5, ca: 4, fa: 19 },
+  { c: "Перекус", n: "Кешью", p: "30 г", cal: 165, pr: 5, ca: 9, fa: 13 },
+  { c: "Перекус", n: "Арахис", p: "30 г", cal: 170, pr: 8, ca: 5, fa: 14 },
+  { c: "Перекус", n: "Семечки", p: "30 г", cal: 175, pr: 6, ca: 6, fa: 15 },
+  { c: "Перекус", n: "Протеиновый батончик", p: "1 шт ~50 г", cal: 200, pr: 20, ca: 18, fa: 7 },
+  { c: "Перекус", n: "Чипсы", p: "30 г", cal: 160, pr: 2, ca: 15, fa: 10 },
+  { c: "Перекус", n: "Сухарики солёные", p: "30 г", cal: 120, pr: 3, ca: 22, fa: 2 },
+  { c: "Перекус", n: "Попкорн", p: "50 г", cal: 195, pr: 4, ca: 30, fa: 7 },
+
+  // Супы
+  { c: "Супы", n: "Куриный суп", p: "300 мл", cal: 180, pr: 14, ca: 14, fa: 8 },
+  { c: "Супы", n: "Борщ", p: "300 мл", cal: 250, pr: 12, ca: 22, fa: 13 },
+  { c: "Супы", n: "Лагман", p: "300 мл", cal: 380, pr: 18, ca: 38, fa: 18 },
+  { c: "Супы", n: "Шурпа", p: "300 мл", cal: 320, pr: 20, ca: 18, fa: 19 },
+
+  // Универсальные
+  { c: "Прочее", n: "Сыр", p: "30 г", cal: 105, pr: 7, ca: 0.5, fa: 9 },
+  { c: "Прочее", n: "Масло сливочное", p: "1 ч.л. (5 г)", cal: 36, pr: 0, ca: 0, fa: 4 },
+  { c: "Прочее", n: "Масло оливковое", p: "1 ст.л. (15 мл)", cal: 130, pr: 0, ca: 0, fa: 14 },
+  { c: "Прочее", n: "Сметана 20%", p: "1 ст.л.", cal: 30, pr: 0.4, ca: 0.5, fa: 3 },
+  { c: "Прочее", n: "Майонез", p: "1 ст.л.", cal: 90, pr: 0, ca: 0, fa: 10 },
+];
+
+// ============== AI ANALYSIS ==============
+async function analyzeFoodText(description) {
+  if (!PROXY_URL) throw new Error("AI not configured");
+  const res = await fetch(`${PROXY_URL}/api/analyze`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mode: "text", payload: { description } }),
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
+async function analyzeFoodImage(base64DataUrl) {
+  if (!PROXY_URL) throw new Error("AI not configured");
+  const [meta, base64] = base64DataUrl.split(",");
+  const mediaType = (meta.match(/data:([^;]+)/) || [])[1] || "image/jpeg";
+  const res = await fetch(`${PROXY_URL}/api/analyze`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mode: "image", payload: { base64, mediaType } }),
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
+function compressImage(file, maxSize = 800, quality = 0.7) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ratio = Math.min(maxSize / img.width, maxSize / img.height, 1);
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ============== STORAGE ==============
+const STORAGE_PREFIX = "tracker:";
+function load(key) {
+  try { const v = localStorage.getItem(STORAGE_PREFIX + key); return v ? JSON.parse(v) : null; } catch { return null; }
+}
+function save(key, value) {
+  try { localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value)); return true; } catch { return false; }
+}
+function listKeys(prefix) {
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith(STORAGE_PREFIX + prefix)) keys.push(k.slice(STORAGE_PREFIX.length));
+  }
+  return keys;
+}
+
+// ============== DATE HELPERS ==============
+function dateToISO(d) {
+  // Use local timezone, not UTC
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+function todayISO() { return dateToISO(new Date()); }
+function dateLabel(d = new Date()) {
+  const m = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+  const days = ["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"];
+  return `${days[d.getDay()]}, ${d.getDate()} ${m[d.getMonth()]}`;
+}
+function getProgramWeek() {
+  const start = new Date(SETTINGS.startDate);
+  const now = new Date();
+  const diffDays = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  return Math.max(1, Math.min(SETTINGS.programWeeks, Math.floor(diffDays / 7) + 1));
+}
+function isSunday() { return new Date().getDay() === 0; }
+function timeNow() { const d = new Date(); return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; }
+function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+function isoToDate(iso) { const [y,m,d] = iso.split("-").map(Number); return new Date(y, m-1, d); }
+function shiftDate(iso, days) {
+  const d = isoToDate(iso);
+  d.setDate(d.getDate() + days);
+  return dateToISO(d);
+}
+function shortDateLabel(iso) {
+  const d = isoToDate(iso);
+  const today = todayISO();
+  const yest = shiftDate(today, -1);
+  const tomr = shiftDate(today, 1);
+  if (iso === today) return "Сегодня";
+  if (iso === yest) return "Вчера";
+  if (iso === tomr) return "Завтра";
+  const m = ["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"];
+  return `${d.getDate()} ${m[d.getMonth()]}`;
+}
+
+// ============== STATE ==============
+const state = {
+  tab: "today",
+  viewDate: todayISO(),
+  today: { tasks: {} },
+  food: [],
+  training: [],
+  checkins: [],
+  history: [],
+};
+
+function loadDayData(iso) {
+  state.viewDate = iso;
+  state.today = load(`daily-${iso}`) || { tasks: {} };
+  state.food = load(`food-${iso}`) || [];
+  state.training = load(`training-${iso}`) || [];
+}
+
+function loadAllCheckins() {
+  const keys = listKeys("checkin-");
+  state.checkins = keys.map(k => load(k)).filter(Boolean).sort((a,b) => a.date.localeCompare(b.date));
+}
+function loadAllHistory() {
+  const keys = listKeys("daily-");
+  state.history = keys.map(k => ({ date: k.replace("daily-",""), ...load(k) })).filter(d => d.tasks).sort((a,b) => a.date.localeCompare(b.date));
+}
+
+// ============== RENDER ==============
+function $(id) { return document.getElementById(id); }
+
+function showToast(text) {
+  const t = $("toast");
+  t.textContent = text;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 1800);
+}
+
+function renderToday() {
+  $("today-date").textContent = dateLabel(isoToDate(state.viewDate));
+  $("today-date-label").textContent = shortDateLabel(state.viewDate);
+  // Disable next button if on today (no future)
+  const isToday = state.viewDate === todayISO();
+  $("today-date-next").style.opacity = isToday ? "0.3" : "1";
+  $("today-date-next").style.pointerEvents = isToday ? "none" : "auto";
+  const week = getProgramWeek();
+  $("week-label").textContent = `неделя ${week} из ${SETTINGS.programWeeks}`;
+
+  const bars = $("week-bars");
+  bars.innerHTML = "";
+  for (let i = 0; i < SETTINGS.programWeeks; i++) {
+    const d = document.createElement("div");
+    d.style.height = "8px";
+    d.style.flex = "1";
+    d.style.borderRadius = "4px";
+    d.style.background = i < week ? "#C8553D" : "#EFE7DA";
+    d.style.opacity = i === week - 1 ? 1 : (i < week ? 0.4 : 1);
+    bars.appendChild(d);
+  }
+
+  const completed = Object.values(state.today.tasks || {}).filter(Boolean).length;
+  $("completed-count").textContent = completed;
+  const labels = { 5: "Полный день. Браво.", 4: "День засчитан.", 3: "В процессе", 2: "В процессе", 1: "Старт", 0: "Старт" };
+  $("completed-label").textContent = labels[completed] || "Старт";
+
+  // streak
+  let s = 0;
+  for (const d of [...state.history].reverse()) {
+    const c = Object.values(d.tasks || {}).filter(Boolean).length;
+    if (c >= 4) s++; else break;
+  }
+  if (s > 0) {
+    $("streak-badge").style.display = "flex";
+    $("streak-count").textContent = `${s} ${s === 1 ? "день" : s < 5 ? "дня" : "дней"}`;
+  } else {
+    $("streak-badge").style.display = "none";
+  }
+
+  // Journal summary
+  const totalCal = state.food.reduce((s,f) => s + (f.calories || 0), 0);
+  const totalPro = state.food.reduce((s,f) => s + (f.protein || 0), 0);
+  const totalBurned = state.training.reduce((s,t) => s + (t.calories || 0), 0);
+  $("summary-cal").textContent = totalCal;
+  $("summary-pro").textContent = totalPro;
+  $("summary-burned").textContent = totalBurned;
+  $("summary-cal").style.color = totalCal > SETTINGS.calorieTarget ? "#C8553D" : "#2D2419";
+  $("cal-bar").style.width = Math.min(100, totalCal / SETTINGS.calorieTarget * 100) + "%";
+  $("pro-bar").style.width = Math.min(100, totalPro / SETTINGS.proteinTarget * 100) + "%";
+
+  // Tasks
+  const tasksList = $("tasks-list");
+  tasksList.innerHTML = "";
+  DAILY_TASKS.forEach(task => {
+    const done = !!state.today.tasks[task.id];
+    const btn = document.createElement("button");
+    btn.className = "task" + (done ? " done" : "");
+    btn.innerHTML = `
+      <div class="task-icon"><span style="font-size: 20px;">${task.icon}</span></div>
+      <div class="spacer">
+        <div class="task-title">${task.title}</div>
+        ${task.detail ? `<div class="task-detail">${task.detail}</div>` : ""}
+      </div>
+      <div class="check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    `;
+    btn.onclick = () => toggleTask(task.id);
+    tasksList.appendChild(btn);
+  });
+
+  $("sunday-checkin").style.display = isSunday() ? "block" : "none";
+  $("motivation-text").textContent = completed >= 4 ? "Помни: 4 из 5 — это успех, не компромисс." : "80% выполнения = результат. 100% = срыв через месяц.";
+}
+
+function renderJournal() {
+  const isToday = state.viewDate === todayISO();
+  $("journal-eyebrow").textContent = isToday ? "Сегодня" : dateLabel(isoToDate(state.viewDate));
+  $("journal-date-label").textContent = shortDateLabel(state.viewDate);
+  $("journal-date-next").style.opacity = isToday ? "0.3" : "1";
+  $("journal-date-next").style.pointerEvents = isToday ? "none" : "auto";
+
+  const totalCal = state.food.reduce((s,f) => s + (f.calories || 0), 0);
+  const totalPro = state.food.reduce((s,f) => s + (f.protein || 0), 0);
+  const totalBurned = state.training.reduce((s,t) => s + (t.calories || 0), 0);
+  const left = SETTINGS.calorieTarget - totalCal;
+  const over = left < 0;
+
+  $("journal-status").textContent = over ? "Превышение" : "Осталось съесть";
+  $("journal-big-num").textContent = over ? `+${Math.abs(left)}` : left;
+  $("journal-big-num").style.color = over ? "#E89A7C" : "#F5EFE6";
+  $("j-eaten").textContent = totalCal;
+  $("j-pro").textContent = totalPro;
+  $("j-burned").textContent = totalBurned;
+
+  // Food list
+  $("food-count").textContent = `${state.food.length} ${state.food.length === 1 ? "запись" : state.food.length < 5 ? "записи" : "записей"}`;
+  const fl = $("food-list");
+  fl.innerHTML = "";
+  if (state.food.length === 0) {
+    fl.innerHTML = `<div class="empty-card"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11h18l-2 9H5z"/><path d="M11 4v3M11 11V4M14 4v3M17 4v3M8 4v3"/></svg><p>Пока пусто. Добавь первый приём пищи.</p></div>`;
+  } else {
+    state.food.forEach(f => {
+      const el = document.createElement("div");
+      el.style.cssText = "background: #FFFFFF; border: 1px solid #F0EBE0; border-radius: 16px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s;";
+      el.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: #FAF6EE; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">🍽</div>
+          <div class="edit-food" data-id="${f.id}" style="flex: 1; min-width: 0;">
+            <div style="display: flex; justify-content: space-between; gap: 8px;">
+              <div style="font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${f.name}</div>
+              <div class="serif" style="font-size: 16px; color: #C8553D; flex-shrink: 0;">${f.calories} <span style="font-size: 12px; color: #8A7E6F;">ккал</span></div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
+              <span style="font-size: 11px; color: #8A7E6F;">${f.time}</span>
+              <span style="font-size: 11px; color: #8A7E6F;">·</span>
+              <span style="font-size: 11px; color: #8A7E6F;">Б ${f.protein}г · У ${f.carbs}г · Ж ${f.fat}г</span>
+            </div>
+          </div>
+          <button class="del-food" data-id="${f.id}" style="padding: 8px; color: #C8B8A0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>
+        </div>
+      `;
+      fl.appendChild(el);
+    });
+    fl.querySelectorAll(".del-food").forEach(b => {
+      b.onclick = (e) => { e.stopPropagation(); deleteFood(b.dataset.id); };
+    });
+    fl.querySelectorAll(".edit-food").forEach(b => {
+      b.onclick = () => openEditFoodModal(b.dataset.id);
+    });
+  }
+
+  // Training list
+  $("training-count").textContent = `${state.training.length}`;
+  const tl = $("training-list");
+  tl.innerHTML = "";
+  if (state.training.length === 0) {
+    tl.innerHTML = `<div class="empty-card"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.4 14.4 9.6 9.6"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/></svg><p>Запиши тренировку, когда будет.</p></div>`;
+  } else {
+    state.training.forEach(t => {
+      const el = document.createElement("div");
+      el.style.cssText = "background: #FFFFFF; border: 1px solid #F0EBE0; border-radius: 16px; padding: 12px; margin-bottom: 8px;";
+      el.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: #EBF1E5; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">🏋️</div>
+          <div class="edit-training" data-id="${t.id}" style="flex: 1; min-width: 0; cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; gap: 8px;">
+              <div style="font-size: 14px; font-weight: 500;">${t.type}</div>
+              <div class="serif" style="font-size: 16px; color: #7A8F6E; flex-shrink: 0;">−${t.calories} <span style="font-size: 12px; color: #8A7E6F;">ккал</span></div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
+              <span style="font-size: 11px; color: #8A7E6F;">${t.time}</span>
+              ${t.duration ? `<span style="font-size: 11px; color: #8A7E6F;">·</span><span style="font-size: 11px; color: #8A7E6F;">${t.duration} мин</span>` : ""}
+            </div>
+          </div>
+          <button class="del-training" data-id="${t.id}" style="padding: 8px; color: #C8B8A0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>
+        </div>
+      `;
+      tl.appendChild(el);
+    });
+    tl.querySelectorAll(".del-training").forEach(b => {
+      b.onclick = (e) => { e.stopPropagation(); deleteTraining(b.dataset.id); };
+    });
+    tl.querySelectorAll(".edit-training").forEach(b => {
+      b.onclick = () => openEditTrainingModal(b.dataset.id);
+    });
+  }
+}
+
+function renderProgress() {
+  const last = state.checkins[state.checkins.length - 1];
+  const cur = last?.weight ?? SETTINGS.startWeight;
+  const lost = SETTINGS.startWeight - cur;
+  const togo = cur - SETTINGS.goalWeight;
+  const pct = (lost / (SETTINGS.startWeight - SETTINGS.goalWeight)) * 100;
+  $("current-weight").textContent = cur.toFixed(1);
+  $("lost-kg").textContent = lost.toFixed(1);
+  $("togo-kg").textContent = togo.toFixed(1);
+  $("progress-bar").style.width = Math.max(2, Math.min(100, pct)) + "%";
+
+  const list = $("checkin-list");
+  list.innerHTML = "";
+  if (state.checkins.length === 0) {
+    list.innerHTML = `<div style="text-align: center; padding: 32px 24px;"><p class="serif" style="font-style: italic; font-size: 15px; color: #8A7E6F;">Сделай первый замер сегодня — это и будет твоя точка отсчёта.</p></div>`;
+    return;
+  }
+  list.innerHTML = `<p class="eyebrow" style="margin-bottom: 12px; padding: 0 8px;">История замеров</p>`;
+  [...state.checkins].reverse().forEach((c, i) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.cssText = "margin-bottom: 8px;" + (i === 0 ? " background: #FFF4ED;" : "");
+    card.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+        <div class="serif" style="font-size: 16px;">${c.date}</div>
+        <div class="serif" style="font-size: 20px; color: #C8553D;">${c.weight} <span style="font-size: 13px; color: #8A7E6F;">кг</span></div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; text-align: center;">
+        ${[
+          ["Талия", c.waist, "см"],
+          ["Бёдра", c.hips, "см"],
+          ["Энергия", c.energy, "/10"],
+          ["Сон", c.sleep, "/10"],
+        ].map(([l,v,u]) => `<div><div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #A89684; margin-bottom: 4px;">${l}</div><div style="font-size: 16px; font-weight: 500;">${v}<span style="font-size: 11px; font-weight: normal; color: #8A7E6F; margin-left: 2px;">${u}</span></div></div>`).join("")}
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function renderPlan() {
+  const tasks = $("plan-tasks");
+  tasks.innerHTML = "";
+  DAILY_TASKS.forEach(t => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.cssText = "margin-bottom: 8px; display: flex; align-items: center; gap: 16px;";
+    card.innerHTML = `
+      <div style="width: 40px; height: 40px; border-radius: 10px; background: #FAF6EE; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">${t.icon}</div>
+      <div>
+        <div style="font-size: 14px; font-weight: 500;">${t.title}</div>
+        ${t.detail ? `<div style="font-size: 12px; color: #8A7E6F; margin-top: 2px;">${t.detail}</div>` : ""}
+      </div>
+    `;
+    tasks.appendChild(card);
+  });
+
+  const week = $("plan-week");
+  week.innerHTML = "";
+  WEEKLY_PLAN.forEach((d, i) => {
+    const row = document.createElement("div");
+    row.style.cssText = `display: flex; align-items: center; gap: 16px; padding: 16px;${i > 0 ? " border-top: 1px solid #F0EBE0;" : ""}`;
+    const isBurn = d.label.includes("Burn");
+    const isCheck = d.label.includes("Чек");
+    const bg = isBurn ? "#C8553D" : isCheck ? "#7A8F6E" : "#FAF6EE";
+    const fg = isBurn || isCheck ? "#FFFFFF" : "#8A7E6F";
+    row.innerHTML = `
+      <div class="serif" style="width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; background: ${bg}; color: ${fg};">${d.day}</div>
+      <div style="flex: 1;">
+        <div style="font-size: 14px; font-weight: 500;">${d.label}</div>
+        <div style="font-size: 12px; color: #8A7E6F;">${d.note}</div>
+      </div>
+    `;
+    week.appendChild(row);
+  });
+}
+
+// ============== ACTIONS ==============
+function toggleTask(id) {
+  state.today.tasks[id] = !state.today.tasks[id];
+  save(`daily-${state.viewDate}`, state.today);
+  loadAllHistory();
+  renderToday();
+  if (Object.values(state.today.tasks).filter(Boolean).length === 5) {
+    const c = $("celebrate");
+    c.style.display = "flex";
+    setTimeout(() => c.style.display = "none", 1500);
+  }
+}
+
+function addFood(entry) {
+  // For past dates, don't override time with current time; let user-supplied or default
+  const time = state.viewDate === todayISO() ? timeNow() : (entry.time || "12:00");
+  state.food.push({ id: newId(), time, ...entry });
+  save(`food-${state.viewDate}`, state.food);
+  renderToday();
+  renderJournal();
+  showToast("Записано");
+}
+function deleteFood(id) {
+  state.food = state.food.filter(f => f.id !== id);
+  save(`food-${state.viewDate}`, state.food);
+  renderToday();
+  renderJournal();
+}
+function addTraining(entry) {
+  const time = state.viewDate === todayISO() ? timeNow() : (entry.time || "18:00");
+  state.training.push({ id: newId(), time, ...entry });
+  save(`training-${state.viewDate}`, state.training);
+  renderToday();
+  renderJournal();
+  showToast("Записано");
+}
+function deleteTraining(id) {
+  state.training = state.training.filter(t => t.id !== id);
+  save(`training-${state.viewDate}`, state.training);
+  renderToday();
+  renderJournal();
+}
+function saveCheckin(data) {
+  save(`checkin-${data.date}`, data);
+  loadAllCheckins();
+  renderProgress();
+  showToast("Замер сохранён");
+}
+
+// ============== MODALS ==============
+function closeModal() {
+  $("modal-root").innerHTML = "";
+}
+
+function openAddFoodModal() {
+  // Step: choose | library | quick | manual | text-input | analyzing | edit-ai
+  let step = PROXY_URL ? "choose" : "library";
+  let selected = null;
+  let qty = 1;
+  let manualName = "";
+  let manualCal = 0, manualPro = 0, manualCar = 0, manualFat = 0;
+  let searchQuery = "";
+  let textInput = "";
+  let photoData = null;
+  let analyzeError = null;
+  let aiResult = null;
+
+  function render() {
+    const root = $("modal-root");
+    let body = "";
+    let title = "Что съела?";
+
+    if (step === "choose") {
+      title = "Что съела?";
+      body = `
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button id="ch-photo" class="ai-btn" style="display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: 16px; background: #C8553D; color: #FFFFFF; text-align: left;">
+            <span style="font-size: 26px;">📷</span>
+            <div>
+              <div style="font-weight: 500; font-size: 15px;">Сфотографировать</div>
+              <div style="font-size: 12px; opacity: 0.85;">ИИ оценит по фото</div>
+            </div>
+          </button>
+          <button id="ch-text" class="ai-btn" style="display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: 16px; background: #7A8F6E; color: #FFFFFF; text-align: left;">
+            <span style="font-size: 26px;">✏️</span>
+            <div>
+              <div style="font-weight: 500; font-size: 15px;">Описать словами</div>
+              <div style="font-size: 12px; opacity: 0.85;">«2 варёных яйца», «миска плова»</div>
+            </div>
+          </button>
+          <button id="ch-library" style="display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: 16px; background: #FFFFFF; color: #2D2419; border: 1px solid #F0EBE0; text-align: left;">
+            <span style="font-size: 26px;">📖</span>
+            <div>
+              <div style="font-weight: 500; font-size: 15px;">Из справочника</div>
+              <div style="font-size: 12px; color: #8A7E6F;">130 продуктов с готовыми калориями</div>
+            </div>
+          </button>
+          <button id="ch-manual" style="display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: 16px; background: #FFFFFF; color: #2D2419; border: 1px solid #F0EBE0; text-align: left;">
+            <span style="font-size: 26px;">✋</span>
+            <div>
+              <div style="font-weight: 500; font-size: 15px;">Ввести вручную</div>
+              <div style="font-size: 12px; color: #8A7E6F;">Если знаешь точные цифры</div>
+            </div>
+          </button>
+        </div>
+        <input type="file" id="photo-file-input" accept="image/*" capture="environment" style="display: none;" />
+      `;
+    } else if (step === "text-input") {
+      title = "Опиши еду";
+      body = `
+        <div class="input-card" style="margin-bottom: 12px;">
+          <label>Что и сколько</label>
+          <textarea id="text-desc" rows="3" autofocus placeholder="2 варёных яйца и тост с авокадо">${textInput}</textarea>
+        </div>
+        <div style="background: #FAF6EE; border-radius: 12px; padding: 12px; display: flex; gap: 10px; margin-bottom: 16px;">
+          <span style="color: #A89684; flex-shrink: 0;">ⓘ</span>
+          <p style="font-size: 12px; line-height: 1.5; color: #8A7E6F;">Указывай количество и способ готовки: «100 г творога», «средняя тарелка плова», «капучино на цельном молоке без сахара». Чем точнее — тем лучше посчитает.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button class="btn-secondary" id="text-back">Назад</button>
+          <button class="btn-green" id="text-analyze" ${textInput.trim() ? "" : "disabled"}>Посчитать</button>
+        </div>
+        ${analyzeError ? `<div style="margin-top: 12px; padding: 12px; border-radius: 12px; background: #FFF4ED; color: #C8553D; font-size: 13px;">${analyzeError}</div>` : ""}
+      `;
+    } else if (step === "analyzing") {
+      title = photoData ? "Анализ фото…" : "Считаю…";
+      body = `
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 32px 16px;">
+          ${photoData ? `<img src="${photoData}" style="width: 140px; height: 140px; border-radius: 16px; object-fit: cover;" />` : `<div style="width: 80px; height: 80px; border-radius: 50%; background: #EBF1E5; display: flex; align-items: center; justify-content: center; font-size: 36px;">✏️</div>`}
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="spinner" style="width: 20px; height: 20px; border: 2px solid #F0EBE0; border-top-color: #C8553D; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+            <p class="serif" style="font-style: italic; font-size: 15px; color: #8A7E6F;">${photoData ? "Смотрю, что у тебя на тарелке…" : "Считаю калории…"}</p>
+          </div>
+        </div>
+        <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+      `;
+    } else if (step === "edit-ai") {
+      title = "Проверь и сохрани";
+      const conf = aiResult?.confidence || "medium";
+      const confColor = conf === "high" ? "#7A8F6E" : conf === "low" ? "#C8553D" : "#A89684";
+      const confLabel = conf === "high" ? "Высокая точность" : conf === "low" ? "Низкая — проверь" : "Средняя";
+      body = `
+        ${photoData ? `<img src="${photoData}" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 16px; margin-bottom: 12px;" />` : ""}
+        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 12px;">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: ${confColor};"></span>
+          <span style="font-size: 12px; color: ${confColor}; font-weight: 500;">${confLabel}</span>
+        </div>
+        ${aiResult?.notes ? `<div style="background: #FAF6EE; border-radius: 12px; padding: 12px; margin-bottom: 12px; font-size: 12px; line-height: 1.5; color: #8A7E6F;">${aiResult.notes}</div>` : ""}
+        <div class="input-card" style="margin-bottom: 12px;">
+          <label>Название</label>
+          <input type="text" id="m-name" value="${(manualName || "").replace(/"/g, '&quot;')}" />
+        </div>
+        <div class="input-card" style="margin-bottom: 12px;">
+          <label>Калории</label>
+          <div class="num-row">
+            <button class="num-btn" id="cal-dec">−</button>
+            <div class="num-input-wrap"><input type="number" id="m-cal" value="${manualCal}" /><div class="unit">ккал</div></div>
+            <button class="num-btn" id="cal-inc">+</button>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px;">
+          <div class="input-card" style="padding: 12px; text-align: center;">
+            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #A89684; margin-bottom: 4px;">Белок</div>
+            <input type="number" id="m-pr" value="${manualPro}" style="font-family: 'Fraunces', serif; font-size: 18px; width: 100%; text-align: center; background: transparent; border: none; outline: none;" />
+            <div style="font-size: 10px; color: #8A7E6F;">г</div>
+          </div>
+          <div class="input-card" style="padding: 12px; text-align: center;">
+            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #A89684; margin-bottom: 4px;">Углеводы</div>
+            <input type="number" id="m-ca" value="${manualCar}" style="font-family: 'Fraunces', serif; font-size: 18px; width: 100%; text-align: center; background: transparent; border: none; outline: none;" />
+            <div style="font-size: 10px; color: #8A7E6F;">г</div>
+          </div>
+          <div class="input-card" style="padding: 12px; text-align: center;">
+            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #A89684; margin-bottom: 4px;">Жиры</div>
+            <input type="number" id="m-fa" value="${manualFat}" style="font-family: 'Fraunces', serif; font-size: 18px; width: 100%; text-align: center; background: transparent; border: none; outline: none;" />
+            <div style="font-size: 10px; color: #8A7E6F;">г</div>
+          </div>
+        </div>
+        <button class="btn-primary" id="ai-save">Сохранить</button>
+        <button class="btn-secondary" id="ai-back" style="margin-top: 8px;">Отмена</button>
+      `;
+    } else if (step === "library") {
+      title = "Что съела?";
+      const filtered = FOOD_LIBRARY.filter(f =>
+        searchQuery === "" || f.n.toLowerCase().includes(searchQuery.toLowerCase()) || f.c.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      const byCategory = {};
+      filtered.forEach(f => {
+        if (!byCategory[f.c]) byCategory[f.c] = [];
+        byCategory[f.c].push(f);
+      });
+      let listHtml = "";
+      for (const cat of Object.keys(byCategory)) {
+        listHtml += `<p class="eyebrow" style="margin: 16px 0 8px;">${cat}</p>`;
+        byCategory[cat].forEach((f) => {
+          const realIdx = FOOD_LIBRARY.indexOf(f);
+          listHtml += `
+            <button class="lib-item" data-idx="${realIdx}" style="width: 100%; text-align: left; background: #FFFFFF; border: 1px solid #F0EBE0; border-radius: 12px; padding: 12px; margin-bottom: 6px; display: flex; align-items: center; gap: 12px;">
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 14px; font-weight: 500;">${f.n}</div>
+                <div style="font-size: 11px; color: #8A7E6F; margin-top: 2px;">${f.p} · Б ${f.pr}г · У ${f.ca}г · Ж ${f.fa}г</div>
+              </div>
+              <div class="serif" style="font-size: 16px; color: #C8553D; flex-shrink: 0;">${f.cal}</div>
+            </button>
+          `;
+        });
+      }
+      if (filtered.length === 0) {
+        listHtml = `<p class="serif" style="font-style: italic; font-size: 14px; color: #8A7E6F; text-align: center; padding: 24px;">Ничего не нашлось. Введи вручную ↓</p>`;
+      }
+
+      body = `
+        ${PROXY_URL ? `<button class="btn-secondary" id="lib-back" style="margin-bottom: 12px;">← Назад к выбору</button>` : ""}
+        <div class="food-search">
+          <span style="color: #A89684;">🔍</span>
+          <input type="text" id="food-search-input" placeholder="Найти продукт…" value="${searchQuery}" />
+        </div>
+        <div style="max-height: 50vh; overflow-y: auto; margin: 0 -4px; padding: 0 4px;">${listHtml}</div>
+        <button class="btn-secondary" id="go-manual" style="margin-top: 16px;">Ввести вручную</button>
+      `;
+    } else if (step === "quick" && selected) {
+      title = "Сколько?";
+      const f = selected;
+      const totals = { cal: f.cal * qty, pr: f.pr * qty, ca: f.ca * qty, fa: f.fa * qty };
+      body = `
+        <div class="card" style="margin-bottom: 16px;">
+          <div style="font-size: 14px; font-weight: 500;">${f.n}</div>
+          <div style="font-size: 12px; color: #8A7E6F; margin-top: 2px;">${f.p}</div>
+        </div>
+        <div class="input-card" style="margin-bottom: 16px;">
+          <label>Сколько порций</label>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 12px;">
+            <button class="num-btn" id="qty-dec">−</button>
+            <span class="serif" style="font-size: 36px; font-weight: 300; min-width: 60px; text-align: center;" id="qty-val">${qty}</span>
+            <button class="num-btn" id="qty-inc">+</button>
+          </div>
+          <div style="display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap;">
+            ${[0.5, 1, 1.5, 2].map(v => `<button class="qty-quick" data-v="${v}" style="padding: 6px 12px; border-radius: 12px; background: ${qty === v ? '#C8553D' : '#FAF6EE'}; color: ${qty === v ? '#FFFFFF' : '#2D2419'}; font-size: 13px;">×${v}</button>`).join("")}
+          </div>
+        </div>
+        <div style="background: linear-gradient(140deg, #2D2419, #3F3328); color: #F5EFE6; border-radius: 16px; padding: 20px; margin-bottom: 16px;">
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; opacity: 0.6; margin-bottom: 8px;">Итого</div>
+          <div class="serif" style="font-size: 36px; font-weight: 300;">${Math.round(totals.cal)} <span style="font-size: 16px; opacity: 0.7;">ккал</span></div>
+          <div style="font-size: 12px; opacity: 0.7; margin-top: 8px;">Б ${Math.round(totals.pr)}г · У ${Math.round(totals.ca)}г · Ж ${Math.round(totals.fa)}г</div>
+        </div>
+        <button class="btn-primary" id="quick-save">Сохранить</button>
+        <button class="btn-secondary" id="quick-back" style="margin-top: 8px;">Назад к списку</button>
+      `;
+    } else if (step === "manual") {
+      title = "Записать еду";
+      body = `
+        <div class="input-card" style="margin-bottom: 12px;">
+          <label>Название</label>
+          <input type="text" id="m-name" value="${manualName}" placeholder="Что съела" />
+        </div>
+        <div class="input-card" style="margin-bottom: 12px;">
+          <label>Калории</label>
+          <div class="num-row">
+            <button class="num-btn" id="cal-dec">−</button>
+            <div class="num-input-wrap"><input type="number" id="m-cal" value="${manualCal}" /><div class="unit">ккал</div></div>
+            <button class="num-btn" id="cal-inc">+</button>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px;">
+          <div class="input-card" style="padding: 12px; text-align: center;">
+            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #A89684; margin-bottom: 4px;">Белок</div>
+            <input type="number" id="m-pr" value="${manualPro}" style="font-family: 'Fraunces', serif; font-size: 18px; width: 100%; text-align: center; background: transparent; border: none; outline: none;" />
+            <div style="font-size: 10px; color: #8A7E6F;">г</div>
+          </div>
+          <div class="input-card" style="padding: 12px; text-align: center;">
+            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #A89684; margin-bottom: 4px;">Углеводы</div>
+            <input type="number" id="m-ca" value="${manualCar}" style="font-family: 'Fraunces', serif; font-size: 18px; width: 100%; text-align: center; background: transparent; border: none; outline: none;" />
+            <div style="font-size: 10px; color: #8A7E6F;">г</div>
+          </div>
+          <div class="input-card" style="padding: 12px; text-align: center;">
+            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #A89684; margin-bottom: 4px;">Жиры</div>
+            <input type="number" id="m-fa" value="${manualFat}" style="font-family: 'Fraunces', serif; font-size: 18px; width: 100%; text-align: center; background: transparent; border: none; outline: none;" />
+            <div style="font-size: 10px; color: #8A7E6F;">г</div>
+          </div>
+        </div>
+        <button class="btn-primary" id="manual-save">Сохранить</button>
+        <button class="btn-secondary" id="manual-back" style="margin-top: 8px;">Назад</button>
+      `;
+    }
+
+    root.innerHTML = `
+      <div class="modal-bg" id="modal-bg">
+        <div class="modal" id="modal-content">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+            <div>
+              <p class="eyebrow" style="margin-bottom: 4px;">${timeNow()}</p>
+              <h2 class="h1" style="font-size: 28px;">${title}</h2>
+            </div>
+            <button class="close-btn" id="modal-close">×</button>
+          </div>
+          ${body}
+        </div>
+      </div>
+    `;
+
+    $("modal-bg").onclick = (e) => { if (e.target.id === "modal-bg") closeModal(); };
+    $("modal-close").onclick = closeModal;
+
+    if (step === "choose") {
+      const fileInput = $("photo-file-input");
+      $("ch-photo").onclick = () => fileInput.click();
+      fileInput.onchange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+          photoData = await compressImage(file, 800, 0.7);
+          step = "analyzing";
+          render();
+          aiResult = await analyzeFoodImage(photoData);
+          manualName = aiResult.name || "";
+          manualCal = Math.round(aiResult.calories) || 0;
+          manualPro = Math.round(aiResult.protein) || 0;
+          manualCar = Math.round(aiResult.carbs) || 0;
+          manualFat = Math.round(aiResult.fat) || 0;
+          step = "edit-ai";
+          render();
+        } catch (err) {
+          analyzeError = "Не получилось проанализировать фото. Попробуй ещё раз или введи вручную.";
+          step = "choose";
+          showToast(analyzeError);
+          render();
+        }
+      };
+      $("ch-text").onclick = () => { step = "text-input"; analyzeError = null; render(); };
+      $("ch-library").onclick = () => { step = "library"; render(); };
+      $("ch-manual").onclick = () => { step = "manual"; render(); };
+    }
+
+    if (step === "text-input") {
+      const ta = $("text-desc");
+      ta.oninput = (e) => {
+        textInput = e.target.value;
+        $("text-analyze").disabled = !textInput.trim();
+      };
+      $("text-back").onclick = () => { step = "choose"; analyzeError = null; render(); };
+      $("text-analyze").onclick = async () => {
+        if (!textInput.trim()) return;
+        const desc = textInput.trim();
+        step = "analyzing";
+        photoData = null;
+        render();
+        try {
+          aiResult = await analyzeFoodText(desc);
+          manualName = aiResult.name || desc;
+          manualCal = Math.round(aiResult.calories) || 0;
+          manualPro = Math.round(aiResult.protein) || 0;
+          manualCar = Math.round(aiResult.carbs) || 0;
+          manualFat = Math.round(aiResult.fat) || 0;
+          step = "edit-ai";
+          render();
+        } catch (err) {
+          analyzeError = "Не получилось обработать. Введи вручную.";
+          manualName = desc;
+          step = "manual";
+          render();
+        }
+      };
+    }
+
+    if (step === "edit-ai") {
+      const sync = () => {
+        manualName = $("m-name").value;
+        manualCal = parseFloat($("m-cal").value) || 0;
+        manualPro = parseFloat($("m-pr").value) || 0;
+        manualCar = parseFloat($("m-ca").value) || 0;
+        manualFat = parseFloat($("m-fa").value) || 0;
+      };
+      $("m-name").oninput = sync;
+      $("m-cal").oninput = sync;
+      $("m-pr").oninput = sync;
+      $("m-ca").oninput = sync;
+      $("m-fa").oninput = sync;
+      $("cal-dec").onclick = () => { sync(); manualCal = Math.max(0, manualCal - 10); render(); };
+      $("cal-inc").onclick = () => { sync(); manualCal = manualCal + 10; render(); };
+      $("ai-save").onclick = () => {
+        sync();
+        if (!manualName.trim()) return;
+        addFood({ name: manualName.trim(), calories: manualCal, protein: manualPro, carbs: manualCar, fat: manualFat });
+        closeModal();
+      };
+      $("ai-back").onclick = () => { step = "choose"; render(); };
+    }
+
+    if (step === "library") {
+      if (PROXY_URL && $("lib-back")) $("lib-back").onclick = () => { step = "choose"; render(); };
+      $("food-search-input").oninput = (e) => { searchQuery = e.target.value; render(); $("food-search-input").focus(); };
+      document.querySelectorAll(".lib-item").forEach(b => {
+        b.onclick = () => { selected = FOOD_LIBRARY[parseInt(b.dataset.idx)]; qty = 1; step = "quick"; render(); };
+      });
+      $("go-manual").onclick = () => { step = "manual"; render(); };
+    }
+
+    if (step === "quick") {
+      $("qty-dec").onclick = () => { qty = Math.max(0.25, parseFloat((qty - 0.25).toFixed(2))); render(); };
+      $("qty-inc").onclick = () => { qty = parseFloat((qty + 0.25).toFixed(2)); render(); };
+      document.querySelectorAll(".qty-quick").forEach(b => {
+        b.onclick = () => { qty = parseFloat(b.dataset.v); render(); };
+      });
+      $("quick-save").onclick = () => {
+        addFood({
+          name: selected.n + (qty !== 1 ? ` ×${qty}` : ""),
+          calories: Math.round(selected.cal * qty),
+          protein: Math.round(selected.pr * qty),
+          carbs: Math.round(selected.ca * qty),
+          fat: Math.round(selected.fa * qty),
+        });
+        closeModal();
+      };
+      $("quick-back").onclick = () => { step = "library"; selected = null; render(); };
+    }
+
+    if (step === "manual") {
+      const sync = () => {
+        manualName = $("m-name").value;
+        manualCal = parseFloat($("m-cal").value) || 0;
+        manualPro = parseFloat($("m-pr").value) || 0;
+        manualCar = parseFloat($("m-ca").value) || 0;
+        manualFat = parseFloat($("m-fa").value) || 0;
+      };
+      $("m-name").oninput = sync;
+      $("m-cal").oninput = sync;
+      $("m-pr").oninput = sync;
+      $("m-ca").oninput = sync;
+      $("m-fa").oninput = sync;
+      $("cal-dec").onclick = () => { sync(); manualCal = Math.max(0, manualCal - 10); render(); };
+      $("cal-inc").onclick = () => { sync(); manualCal = manualCal + 10; render(); };
+      $("manual-save").onclick = () => {
+        sync();
+        if (!manualName.trim()) return;
+        addFood({ name: manualName.trim(), calories: manualCal, protein: manualPro, carbs: manualCar, fat: manualFat });
+        closeModal();
+      };
+      $("manual-back").onclick = () => { step = PROXY_URL ? "choose" : "library"; render(); };
+    }
+  }
+
+  render();
+}
+
+function openAddTrainingModal() {
+  let typeIdx = 0;
+  let calories = TRAINING_TYPES[0].cal;
+  let duration = 60;
+
+  function render() {
+    const root = $("modal-root");
+    root.innerHTML = `
+      <div class="modal-bg" id="modal-bg">
+        <div class="modal">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+            <div>
+              <p class="eyebrow" style="margin-bottom: 4px;">${timeNow()}</p>
+              <h2 class="h1" style="font-size: 28px;">Тренировка</h2>
+            </div>
+            <button class="close-btn" id="modal-close">×</button>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <p class="eyebrow" style="margin-bottom: 8px;">Тип</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              ${TRAINING_TYPES.map((t, i) => `<button class="t-type" data-i="${i}" style="padding: 12px; border-radius: 12px; font-size: 14px; background: ${i === typeIdx ? '#7A8F6E' : '#FFFFFF'}; color: ${i === typeIdx ? '#FFFFFF' : '#2D2419'}; border: 1px solid ${i === typeIdx ? '#7A8F6E' : '#F0EBE0'};">${t.name}</button>`).join("")}
+            </div>
+          </div>
+          <div class="input-card" style="margin-bottom: 12px;">
+            <label>Калории</label>
+            <div class="num-row">
+              <button class="num-btn" id="cal-dec">−</button>
+              <div class="num-input-wrap"><input type="number" id="t-cal" value="${calories}" /><div class="unit">ккал</div></div>
+              <button class="num-btn" id="cal-inc">+</button>
+            </div>
+          </div>
+          <div class="input-card" style="margin-bottom: 16px;">
+            <label>Длительность</label>
+            <div class="num-row">
+              <button class="num-btn" id="dur-dec">−</button>
+              <div class="num-input-wrap"><input type="number" id="t-dur" value="${duration}" /><div class="unit">мин</div></div>
+              <button class="num-btn" id="dur-inc">+</button>
+            </div>
+          </div>
+          <div style="background: #FAF6EE; border-radius: 12px; padding: 12px; display: flex; gap: 10px; margin-bottom: 16px;">
+            <span style="color: #A89684; flex-shrink: 0;">ⓘ</span>
+            <p style="font-size: 12px; line-height: 1.5; color: #8A7E6F;">Приложения завышают сжигание на 20–30%. Лучше брать чуть меньше.</p>
+          </div>
+          <button class="btn-green" id="t-save">Сохранить</button>
+        </div>
+      </div>
+    `;
+
+    $("modal-bg").onclick = (e) => { if (e.target.id === "modal-bg") closeModal(); };
+    $("modal-close").onclick = closeModal;
+    document.querySelectorAll(".t-type").forEach(b => {
+      b.onclick = () => { typeIdx = parseInt(b.dataset.i); calories = TRAINING_TYPES[typeIdx].cal; render(); };
+    });
+    $("t-cal").oninput = (e) => { calories = parseFloat(e.target.value) || 0; };
+    $("t-dur").oninput = (e) => { duration = parseFloat(e.target.value) || 0; };
+    $("cal-dec").onclick = () => { calories = Math.max(0, calories - 10); render(); };
+    $("cal-inc").onclick = () => { calories = calories + 10; render(); };
+    $("dur-dec").onclick = () => { duration = Math.max(0, duration - 5); render(); };
+    $("dur-inc").onclick = () => { duration = duration + 5; render(); };
+    $("t-save").onclick = () => {
+      addTraining({ type: TRAINING_TYPES[typeIdx].name, calories, duration });
+      closeModal();
+    };
+  }
+  render();
+}
+
+function openEditFoodModal(id) {
+  const entry = state.food.find(f => f.id === id);
+  if (!entry) return;
+  let name = entry.name;
+  let calories = entry.calories;
+  let protein = entry.protein;
+  let carbs = entry.carbs;
+  let fat = entry.fat;
+  let time = entry.time;
+
+  function render() {
+    const root = $("modal-root");
+    root.innerHTML = `
+      <div class="modal-bg" id="modal-bg">
+        <div class="modal">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+            <div>
+              <p class="eyebrow" style="margin-bottom: 4px;">Изменить</p>
+              <h2 class="h1" style="font-size: 28px;">Запись еды</h2>
+            </div>
+            <button class="close-btn" id="modal-close">×</button>
+          </div>
+          <div class="input-card" style="margin-bottom: 12px;">
+            <label>Название</label>
+            <input type="text" id="ef-name" value="${name.replace(/"/g, '&quot;')}" />
+          </div>
+          <div class="input-card" style="margin-bottom: 12px;">
+            <label>Время</label>
+            <input type="text" id="ef-time" value="${time}" placeholder="12:00" style="font-family: 'Manrope', sans-serif; font-size: 18px;" />
+          </div>
+          ${numberFieldHtml("Калории", "ef-cal", calories, "ккал", 10)}
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px;">
+            <div class="input-card" style="padding: 12px; text-align: center;">
+              <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #A89684; margin-bottom: 4px;">Белок</div>
+              <input type="number" id="ef-pr" value="${protein}" style="font-family: 'Fraunces', serif; font-size: 18px; width: 100%; text-align: center; background: transparent; border: none; outline: none;" />
+              <div style="font-size: 10px; color: #8A7E6F;">г</div>
+            </div>
+            <div class="input-card" style="padding: 12px; text-align: center;">
+              <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #A89684; margin-bottom: 4px;">Углеводы</div>
+              <input type="number" id="ef-ca" value="${carbs}" style="font-family: 'Fraunces', serif; font-size: 18px; width: 100%; text-align: center; background: transparent; border: none; outline: none;" />
+              <div style="font-size: 10px; color: #8A7E6F;">г</div>
+            </div>
+            <div class="input-card" style="padding: 12px; text-align: center;">
+              <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #A89684; margin-bottom: 4px;">Жиры</div>
+              <input type="number" id="ef-fa" value="${fat}" style="font-family: 'Fraunces', serif; font-size: 18px; width: 100%; text-align: center; background: transparent; border: none; outline: none;" />
+              <div style="font-size: 10px; color: #8A7E6F;">г</div>
+            </div>
+          </div>
+          <button class="btn-primary" id="ef-save">Сохранить</button>
+          <button id="ef-delete" style="width: 100%; margin-top: 8px; padding: 14px; border-radius: 16px; background: transparent; color: #C8553D; font-weight: 500; font-size: 14px;">Удалить запись</button>
+        </div>
+      </div>
+    `;
+    $("modal-bg").onclick = (e) => { if (e.target.id === "modal-bg") closeModal(); };
+    $("modal-close").onclick = closeModal;
+    setupNumberField("ef-cal", v => calories = v, 10);
+    $("ef-name").oninput = (e) => name = e.target.value;
+    $("ef-time").oninput = (e) => time = e.target.value;
+    $("ef-pr").oninput = (e) => protein = parseFloat(e.target.value) || 0;
+    $("ef-ca").oninput = (e) => carbs = parseFloat(e.target.value) || 0;
+    $("ef-fa").oninput = (e) => fat = parseFloat(e.target.value) || 0;
+    $("ef-save").onclick = () => {
+      const idx = state.food.findIndex(f => f.id === id);
+      if (idx === -1) return;
+      state.food[idx] = { ...state.food[idx], name, calories, protein, carbs, fat, time };
+      save(`food-${state.viewDate}`, state.food);
+      renderToday();
+      renderJournal();
+      showToast("Сохранено");
+      closeModal();
+    };
+    $("ef-delete").onclick = () => {
+      deleteFood(id);
+      closeModal();
+    };
+  }
+  render();
+}
+
+function openEditTrainingModal(id) {
+  const entry = state.training.find(t => t.id === id);
+  if (!entry) return;
+  let typeIdx = TRAINING_TYPES.findIndex(t => t.name === entry.type);
+  if (typeIdx === -1) typeIdx = TRAINING_TYPES.length - 1;
+  let calories = entry.calories;
+  let duration = entry.duration || 0;
+  let time = entry.time;
+
+  function render() {
+    const root = $("modal-root");
+    root.innerHTML = `
+      <div class="modal-bg" id="modal-bg">
+        <div class="modal">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+            <div>
+              <p class="eyebrow" style="margin-bottom: 4px;">Изменить</p>
+              <h2 class="h1" style="font-size: 28px;">Тренировка</h2>
+            </div>
+            <button class="close-btn" id="modal-close">×</button>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <p class="eyebrow" style="margin-bottom: 8px;">Тип</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              ${TRAINING_TYPES.map((t, i) => `<button class="et-type" data-i="${i}" style="padding: 12px; border-radius: 12px; font-size: 14px; background: ${i === typeIdx ? '#7A8F6E' : '#FFFFFF'}; color: ${i === typeIdx ? '#FFFFFF' : '#2D2419'}; border: 1px solid ${i === typeIdx ? '#7A8F6E' : '#F0EBE0'};">${t.name}</button>`).join("")}
+            </div>
+          </div>
+          <div class="input-card" style="margin-bottom: 12px;">
+            <label>Время</label>
+            <input type="text" id="et-time" value="${time}" placeholder="18:00" style="font-family: 'Manrope', sans-serif; font-size: 18px;" />
+          </div>
+          ${numberFieldHtml("Калории", "et-cal", calories, "ккал", 10)}
+          ${numberFieldHtml("Длительность", "et-dur", duration, "мин", 5)}
+          <button class="btn-green" id="et-save" style="margin-top: 8px;">Сохранить</button>
+          <button id="et-delete" style="width: 100%; margin-top: 8px; padding: 14px; border-radius: 16px; background: transparent; color: #C8553D; font-weight: 500; font-size: 14px;">Удалить запись</button>
+        </div>
+      </div>
+    `;
+    $("modal-bg").onclick = (e) => { if (e.target.id === "modal-bg") closeModal(); };
+    $("modal-close").onclick = closeModal;
+    setupNumberField("et-cal", v => calories = v, 10);
+    setupNumberField("et-dur", v => duration = v, 5);
+    $("et-time").oninput = (e) => time = e.target.value;
+    document.querySelectorAll(".et-type").forEach(b => {
+      b.onclick = () => { typeIdx = parseInt(b.dataset.i); render(); };
+    });
+    $("et-save").onclick = () => {
+      const idx = state.training.findIndex(t => t.id === id);
+      if (idx === -1) return;
+      state.training[idx] = { ...state.training[idx], type: TRAINING_TYPES[typeIdx].name, calories, duration, time };
+      save(`training-${state.viewDate}`, state.training);
+      renderToday();
+      renderJournal();
+      showToast("Сохранено");
+      closeModal();
+    };
+    $("et-delete").onclick = () => {
+      deleteTraining(id);
+      closeModal();
+    };
+  }
+  render();
+}
+
+function openCheckinModal() {
+  const last = state.checkins[state.checkins.length - 1];
+  let weight = last?.weight ?? SETTINGS.startWeight;
+  let waist = last?.waist ?? 95;
+  let hips = last?.hips ?? 110;
+  let energy = last?.energy ?? 7;
+  let sleep = last?.sleep ?? 7;
+  const date = todayISO();
+
+  function render() {
+    const root = $("modal-root");
+    root.innerHTML = `
+      <div class="modal-bg" id="modal-bg">
+        <div class="modal">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+            <div>
+              <p class="eyebrow" style="margin-bottom: 4px;">${date}</p>
+              <h2 class="h1" style="font-size: 28px;">Замер недели</h2>
+            </div>
+            <button class="close-btn" id="modal-close">×</button>
+          </div>
+          ${numberFieldHtml("Вес", "ck-weight", weight, "кг", 0.1)}
+          ${numberFieldHtml("Талия", "ck-waist", waist, "см", 0.5)}
+          ${numberFieldHtml("Бёдра", "ck-hips", hips, "см", 0.5)}
+          ${scaleFieldHtml("Энергия", "ck-energy", energy)}
+          ${scaleFieldHtml("Сон", "ck-sleep", sleep)}
+          <button class="btn-primary" id="ck-save" style="margin-top: 12px;">Сохранить замер</button>
+        </div>
+      </div>
+    `;
+
+    $("modal-bg").onclick = (e) => { if (e.target.id === "modal-bg") closeModal(); };
+    $("modal-close").onclick = closeModal;
+    setupNumberField("ck-weight", v => weight = v, 0.1);
+    setupNumberField("ck-waist", v => waist = v, 0.5);
+    setupNumberField("ck-hips", v => hips = v, 0.5);
+    setupScaleField("ck-energy", v => energy = v);
+    setupScaleField("ck-sleep", v => sleep = v);
+    $("ck-save").onclick = () => {
+      saveCheckin({ date, weight, waist, hips, energy, sleep });
+      closeModal();
+    };
+  }
+  render();
+}
+
+function numberFieldHtml(label, id, value, unit, step) {
+  return `
+    <div class="input-card" style="margin-bottom: 12px;">
+      <label>${label}</label>
+      <div class="num-row">
+        <button class="num-btn" data-id="${id}-dec">−</button>
+        <div class="num-input-wrap"><input type="number" id="${id}" value="${value}" step="${step}" /><div class="unit">${unit}</div></div>
+        <button class="num-btn" data-id="${id}-inc">+</button>
+      </div>
+    </div>
+  `;
+}
+
+function setupNumberField(id, setter, step) {
+  const el = $(id);
+  el.oninput = (e) => setter(parseFloat(e.target.value) || 0);
+  document.querySelector(`[data-id="${id}-dec"]`).onclick = () => {
+    const v = Math.max(0, parseFloat((parseFloat(el.value) - step).toFixed(2)));
+    el.value = v;
+    setter(v);
+  };
+  document.querySelector(`[data-id="${id}-inc"]`).onclick = () => {
+    const v = parseFloat((parseFloat(el.value) + step).toFixed(2));
+    el.value = v;
+    setter(v);
+  };
+}
+
+function scaleFieldHtml(label, id, value) {
+  return `
+    <div class="input-card" style="margin-bottom: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <label>${label}</label>
+        <span class="serif" style="font-size: 18px; color: #C8553D;"><span id="${id}-val">${value}</span><span style="font-size: 13px; color: #8A7E6F;">/10</span></span>
+      </div>
+      <div class="scale-grid" id="${id}-grid">
+        ${Array.from({length: 10}, (_, i) => i + 1).map(n => `<button class="scale-btn ${n <= value ? 'active' : ''}" data-n="${n}">${n}</button>`).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function setupScaleField(id, setter) {
+  const grid = $(`${id}-grid`);
+  grid.querySelectorAll(".scale-btn").forEach(btn => {
+    btn.onclick = () => {
+      const n = parseInt(btn.dataset.n);
+      setter(n);
+      $(`${id}-val`).textContent = n;
+      grid.querySelectorAll(".scale-btn").forEach(b => {
+        const bn = parseInt(b.dataset.n);
+        b.classList.toggle("active", bn <= n);
+      });
+    };
+  });
+}
+
+// ============== TABS ==============
+function switchTab(name) {
+  state.tab = name;
+  document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
+  $(`tab-${name}`).classList.add("active");
+  document.querySelector(`.nav-btn[data-tab="${name}"]`).classList.add("active");
+  if (name === "today") renderToday();
+  if (name === "journal") renderJournal();
+  if (name === "progress") renderProgress();
+  if (name === "plan") renderPlan();
+  window.scrollTo(0, 0);
+}
+
+// ============== INIT ==============
+loadDayData(todayISO());
+loadAllCheckins();
+loadAllHistory();
+renderToday();
+renderJournal();
+renderProgress();
+renderPlan();
+
+function changeViewDate(newDate) {
+  // Don't allow future dates
+  if (newDate > todayISO()) return;
+  loadDayData(newDate);
+  renderToday();
+  renderJournal();
+}
+
+function openDatePicker() {
+  // Build last 30 days list
+  const days = [];
+  for (let i = 0; i < 30; i++) {
+    days.push(shiftDate(todayISO(), -i));
+  }
+  const root = $("modal-root");
+  root.innerHTML = `
+    <div class="modal-bg" id="modal-bg">
+      <div class="modal" style="max-height: 70vh;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+          <h2 class="h1" style="font-size: 28px;">Выбрать день</h2>
+          <button class="close-btn" id="modal-close">×</button>
+        </div>
+        <div style="max-height: 50vh; overflow-y: auto;">
+          ${days.map(d => {
+            const isCurrent = d === state.viewDate;
+            const hasData = !!load(`food-${d}`) || !!load(`daily-${d}`) || !!load(`training-${d}`);
+            return `
+              <button class="dp-day" data-d="${d}" style="width: 100%; text-align: left; padding: 14px 16px; border-radius: 12px; margin-bottom: 6px; background: ${isCurrent ? '#C8553D' : '#FFFFFF'}; color: ${isCurrent ? '#FFFFFF' : '#2D2419'}; border: 1px solid ${isCurrent ? '#C8553D' : '#F0EBE0'}; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-family: 'Fraunces', serif; font-style: italic; font-size: 16px;">${shortDateLabel(d)}</span>
+                <span style="font-size: 12px; opacity: ${isCurrent ? 0.8 : 0.5};">${dateLabel(isoToDate(d)).split(",")[0]}${hasData && !isCurrent ? ' ●' : ''}</span>
+              </button>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+  $("modal-bg").onclick = (e) => { if (e.target.id === "modal-bg") closeModal(); };
+  $("modal-close").onclick = closeModal;
+  document.querySelectorAll(".dp-day").forEach(b => {
+    b.onclick = () => { changeViewDate(b.dataset.d); closeModal(); };
+  });
+}
+
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.onclick = () => switchTab(btn.dataset.tab);
+});
+$("journal-summary-card").onclick = () => switchTab("journal");
+$("add-food-btn").onclick = openAddFoodModal;
+$("add-training-btn").onclick = openAddTrainingModal;
+$("add-checkin-btn").onclick = openCheckinModal;
+$("sunday-checkin").onclick = openCheckinModal;
+
+// Date navigators (both Today and Journal screens)
+$("today-date-prev").onclick = () => changeViewDate(shiftDate(state.viewDate, -1));
+$("today-date-next").onclick = () => changeViewDate(shiftDate(state.viewDate, 1));
+$("today-date-label").onclick = openDatePicker;
+$("journal-date-prev").onclick = () => changeViewDate(shiftDate(state.viewDate, -1));
+$("journal-date-next").onclick = () => changeViewDate(shiftDate(state.viewDate, 1));
+$("journal-date-label").onclick = openDatePicker;
+</script>
+</body>
+</html>
